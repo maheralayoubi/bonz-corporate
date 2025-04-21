@@ -53,19 +53,23 @@ export async function POST(request: Request) {
     try {
       await transporter.sendMail(mailOptions);
       return NextResponse.json({ message: "送信成功" }, { status: 200 });
-    } catch (emailError) {
+    } catch (emailError: unknown) {
       console.error("メール送信エラー:", emailError);
-      // Return detailed error information for debugging
+      // Check if emailError is an Error object before accessing .message
+      const errorMessage = emailError instanceof Error ? emailError.message : 'Unknown error';
+      
       return NextResponse.json({ 
         error: "メール送信に失敗しました", 
-        details: emailError.message 
+        details: errorMessage 
       }, { status: 500 });
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("リクエスト処理エラー:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    
     return NextResponse.json({ 
       error: "リクエスト処理に失敗しました",
-      details: error.message
+      details: errorMessage
     }, { status: 500 });
   }
 }
